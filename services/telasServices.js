@@ -1,5 +1,28 @@
 const pool = require('../db/connection');
 
+exports.getCadastroUser = async (req, res) => {
+    try {
+        if (req.session.mensagem) {
+            const mensagem = req.session.mensagem;
+            req.session.mensagem = null;
+            res.render('cadastroUser', {
+                mensagem: mensagem
+            });
+        }
+        else {
+            res.render('cadastroUser');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar a página de cadastro:', error);
+        res.status(500).render('paginaErro', {
+            title: 'Erro Interno do Servidor',
+            message: 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
+            erro: error,
+            status: 500
+        });
+    }
+}
+
 exports.getLogin = async (req, res) => {
     try {
         if (req.session.mensagem) {
@@ -33,31 +56,6 @@ exports.getHome = async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao carregar os dados:', error);
-        res.status(500).render('paginaErro', {
-            title: 'Erro Interno do Servidor',
-            message: 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
-            erro: error,
-            status: 500
-        });
-    }
-}
-
-exports.getLogout = async (req, res) => {
-    try {
-        req.session.destroy((err) => {
-            if (err) {
-                console.error('Erro ao destruir a sessão:', err);
-                return res.render('paginaErro', {
-                    title: 'Erro Interno do Servidor',
-                    message: 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
-                    erro: err,
-                    status: err.status
-                });
-            }
-            res.redirect('/login');
-        });
-    } catch (error) {
-        console.error('Erro ao processar o logout:', error);
         res.status(500).render('paginaErro', {
             title: 'Erro Interno do Servidor',
             message: 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
