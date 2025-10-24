@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cadastro de Pratos - RU ICET</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css">
+  <style>
+    .prato-do-dia { border-left: 4px solid #ffc107; }
+    .imagem-thumb { width: 72px; height: 56px; object-fit: cover; border-radius: 4px; }
+    .table-wrap { max-height: 420px; overflow:auto; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="/">RU ICET</a>
+    <div class="d-flex">
+      <a class="btn btn-outline-secondary me-2" href="/">Home</a>
+      <a class="btn btn-outline-primary" href="/cardapio/cadastrar">Cadastrar Cardápio</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <% if (typeof mensagem !== 'undefined' && mensagem) { %>
+    <div class="alert alert-info"><%= mensagem %></div>
+  <% } %>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0">Novo Prato</h5>
+        </div>
+        <div class="card-body">
+          <form action="/cardapio/pratos/cadastrar" method="post" novalidate>
+            <div class="mb-3">
+              <label for="nome" class="form-label">Nome</label>
+              <input id="nome" name="nome" type="text" class="form-control" required>
+              <div class="invalid-feedback">Informe o nome do prato.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="descricao" class="form-label">Descrição</label>
+              <textarea id="descricao" name="descricao" rows="4" class="form-control" required></textarea>
+              <div class="invalid-feedback">Informe uma descrição curta.</div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+              <button type="reset" class="btn btn-outline-secondary me-2">Limpar</button>
+              <button type="submit" class="btn btn-primary">Salvar Prato</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Pratos Cadastrados</h5>
+          <small class="text-muted">Total: <%= (pratos || []).length %></small>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Imagem</th>
+                  <th scope="col">Nome</th>
+                  <th scope="col">Descrição</th>
+                  <th scope="col" class="text-end">Curtidas</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!pratos || pratos.length === 0) { %>
+                  <tr>
+                    <td colspan="6" class="text-center text-muted">Nenhum prato cadastrado.</td>
+                  </tr>
+                <% } %>
+                <% (pratos || []).forEach(function(p) { %>
+                  <tr class="<%= p.prato_dia ? 'prato-do-dia' : '' %>">
+                    <td><%= p.id %></td>
+                    <td><img src="/images/<%= p.imagem || 'placeholder.png' %>" alt="<%= p.nome %>" class="imagem-thumb"></td>
+                    <td><strong><%= p.nome %></strong></td>
+                    <td class="text-truncate" style="max-width:260px;"><%= p.descricao || '' %></td>
+                    <td class="text-end"><%= p.curtidas || 0 %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

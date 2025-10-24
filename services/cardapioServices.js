@@ -1,5 +1,49 @@
 const pool = require('../db/connection');
 
+exports.telaCadPrato = async (req, res) => {
+    try {
+        // coleta todos os pratos do banco de dados
+        const [pratos] = await pool.query('SELECT id, nome, descricao FROM prato ORDER BY nome');
+
+        // verifica se há mensagem na sessão para exibir na view
+        if (req.session.mensagem) {
+            const mensagem = req.session.mensagem;
+            req.session.mensagem = null;
+            return res.render('cadastroPrato', { pratos, mensagem });
+        }
+        res.render('cadastroPrato', { pratos });
+    } catch (error) {
+        console.error('Erro ao carregar tela de cadastro de prato:', error);
+        res.status(500).render('paginaErro', {
+            title: 'Erro Interno do Servidor',
+            message: 'Ocorreu um erro ao carregar a tela de cadastro de prato.',
+            erro: error,
+            status: 500
+        });
+    }
+}
+
+exports.cadPrato = async (req, res) => {
+    try {
+        const { nome, descricao } = req.body;
+        if (!nome || !descricao) {
+            req.session.mensagem = 'Preencha todos os campos obrigatórios.';
+            return res.redirect('/prato/cadastrar');
+        }
+        await pool.query('INSERT INTO prato (nome, descricao) VALUES (?, ?)', [nome, descricao]);
+        req.session.mensagem = 'Prato cadastrado com sucesso.';
+        res.redirect('/cardapio/pratos');
+    } catch (error) {
+        console.error('Erro ao cadastrar prato:', error);
+        res.status(500).render('paginaErro', {
+            title: 'Erro Interno do Servidor',
+            message: 'Ocorreu um erro ao cadastrar o prato. Tente novamente mais tarde.',
+            erro: error,
+            status: 500
+        });
+    }
+}
+
 exports.telaCadCardapio = async (req, res) => {
     try {
         // busca todos os pratos para popular os selects na view
