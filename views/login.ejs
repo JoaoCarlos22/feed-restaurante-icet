@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - RU ICET</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="/">RU ICET</a>
+  </div>
+</nav>
+
+<div class="container">
+  <% if (typeof mensagem !== 'undefined' && mensagem) { %>
+    <div class="alert alert-info"><%= mensagem %></div>
+  <% } %>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0">Login</h5>
+        </div>
+        <div class="card-body">
+          <form action="/login" method="post" class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input id="email" name="email" type="email" class="form-control" required>
+              <div class="invalid-feedback">Informe um email válido.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="senha" class="form-label">Senha</label>
+              <input id="senha" name="senha" type="password" class="form-control" required>
+              <div class="invalid-feedback">Informe sua senha.</div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="/cadastro" class="small">Ainda não tem conta? Cadastre-se</a>
+              <button class="btn btn-primary" type="submit">Entrar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // validação simples do Bootstrap
+  (function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+  })()
+</script>
+</body>
+</html>
