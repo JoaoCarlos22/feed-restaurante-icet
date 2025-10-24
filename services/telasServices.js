@@ -41,3 +41,28 @@ exports.getHome = async (req, res) => {
         });
     }
 }
+
+exports.getLogout = async (req, res) => {
+    try {
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Erro ao destruir a sessão:', err);
+                return res.render('paginaErro', {
+                    title: 'Erro Interno do Servidor',
+                    message: 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
+                    erro: err,
+                    status: err.status
+                });
+            }
+            res.redirect('/login');
+        });
+    } catch (error) {
+        console.error('Erro ao processar o logout:', error);
+        res.status(500).render('paginaErro', {
+            title: 'Erro Interno do Servidor',
+            message: 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
+            erro: error,
+            status: 500
+        });
+    }
+}
