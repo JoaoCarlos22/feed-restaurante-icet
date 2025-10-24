@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cadastrar Cardápio - RU ICET</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css">
+  <style>
+    .day-column { min-height: 160px; }
+    .dish-item { cursor: grab; }
+    .prato-do-dia-badge { transform: translateY(-2px); }
+    .cardapio-actions { gap: .5rem; }
+    .select-prato { max-width: 100%; }
+    .placeholder-empty { opacity: .6; font-style: italic; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="/">RU ICET</a>
+    <div class="d-flex">
+      <a class="btn btn-outline-secondary me-2" href="/">Home</a>
+      <a class="btn btn-outline-primary" href="/login">Login</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <% if (typeof mensagem !== 'undefined' && mensagem) { %>
+    <div class="alert alert-info"><%= mensagem %></div>
+  <% } %>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Cadastrar Cardápio Semanal</h3>
+    <small class="text-muted">Adicione pratos por dia e marque o <strong>Prato do Dia</strong>.</small>
+  </div>
+
+  <form id="cardapioForm" action="/cardapio/cadastrar" method="post" class="needs-validation" novalidate>
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-4">
+        <label for="dia_inicio" class="form-label">Dia inicial</label>
+        <input id="dia_inicio" name="dia_inicio" type="date" class="form-control" required>
+        <div class="invalid-feedback">Informe a data inicial do cardápio.</div>
+      </div>
+      <div class="col-12 col-md-4">
+        <label for="dia_final" class="form-label">Dia final</label>
+        <input id="dia_final" name="dia_final" type="date" class="form-control" required>
+        <div class="invalid-feedback">Informe a data final do cardápio.</div>
+      </div>
+      <div class="col-12 col-md-4 d-flex align-items-end">
+        <div class="form-text">Selecione pratos da lista para cada dia. É possível adicionar múltiplos pratos por dia.</div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <% const dias = ['segunda','terça','quarta','quinta','sexta']; %>
+      <% dias.forEach(function(dia) { %>
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <strong class="text-capitalize"><%= dia %></strong>
+              <small class="text-muted">Arraste para ordenar</small>
+            </div>
+            <div class="card-body day-column d-flex flex-column">
+              <div class="mb-2">
+                <div class="input-group">
+                  <select class="form-select select-prato" data-dia="<%= dia %>">
+                    <option value="" selected>Selecionar prato...</option>
+                    <% (pratos || []).forEach(function(p) { %>
+                      <option value="<%= p.id %>" data-nome="<%= p.nome %>"><%= p.nome %></option>
+                    <% }) %>
+                  </select>
+                  <button type="button" class="btn btn-success" onclick="addPrato('<%= dia %>')" title="Adicionar prato"><i class="bi bi-plus-lg"></i></button>
+                </div>
+              </div>
+
+              <div class="list-group flex-grow-1 mb-2" id="lista-<%= dia %>">
+                <div class="list-group-item placeholder-empty">Nenhum prato adicionado para <strong class="text-capitalize"><%= dia %></strong>.</div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="form-check">
+                  <!-- radio global: apenas 1 prato do dia por cardápio -->
+                  <input class="form-check-input prato-do-dia-radio" type="radio" name="prato_do_dia" value="" data-dia="<%= dia %>">
+                  <label class="form-check-label small">Marcar prato do dia</label>
+                </div>
+                <div class="small text-muted">Use as setas para ordenar</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- campo oculto que conterá o JSON do cardápio montado pelo JS -->
+    <input type="hidden" name="cardapio_json" id="cardapio_json">
+
+    <div class="d-flex justify-content-end cardapio-actions">
+      <button type="reset" class="btn btn-outline-secondary">Limpar</button>
+      <button type="submit" class="btn btn-primary">Salvar Cardápio</button>
+    </div>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // UI helpers
+  function $(sel, ctx=document) { return ctx.querySelector(sel); }
+  function $$(sel, ctx=document) { return Array.from(ctx.querySelectorAll(sel)); }
+
+  // Adiciona prato à lista do dia
+  function addPrato(dia) {
+    const select = document.querySelector('select[data-dia="' + dia + '"]');
+    const val = select.value;
+    if (!val) return;
+    const nome = select.selectedOptions[0].dataset.nome || select.selectedOptions[0].text;
+    const lista = document.getElementById('lista-' + dia);
+
+    // Remove placeholder se necessário
+    if (lista.children.length === 1 && lista.children[0].classList.contains('placeholder-empty')) {
+      lista.innerHTML = '';
+    }
+
+    const idx = lista.children.length;
+    const item = document.createElement('div');
+    item.className = 'list-group-item d-flex align-items-center justify-content-between dish-item';
+    item.draggable = true;
+    item.dataset.pratoId = val;
+    item.dataset.dia = dia;
+    item.dataset.posicao = idx;
+
+    item.innerHTML = `
+      <div class="d-flex align-items-center gap-3">
+        <i class="bi bi-list"></i>
+        <div>
+          <div class="fw-semibold">${nome}</div>
+          <small class="text-muted">ID: ${val}</small>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Mover para cima" onclick="moveUp(this)"><i class="bi bi-arrow-up"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Mover para baixo" onclick="moveDown(this)"><i class="bi bi-arrow-down"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-danger" title="Remover" onclick="removeItem(this)"><i class="bi bi-trash"></i></button>
+        <div class="form-check ms-2">
+          <input class="form-check-input prato-do-dia-radio-item" type="radio" name="prato_do_dia_item" value="${val}">
+        </div>
+      </div>
+    `;
+    lista.appendChild(item);
+    select.value = ''; // reset select
+  }
+
+  function removeItem(btn) {
+    const item = btn.closest('.list-group-item');
+    const lista = item.parentElement;
+    item.remove();
+    if (!lista.children.length) {
+      lista.innerHTML = `<div class="list-group-item placeholder-empty">Nenhum prato adicionado para <strong class="text-capitalize">${lista.id.replace('lista-','')}</strong>.</div>`;
+    }
+  }
+
+  function moveUp(btn) {
+    const item = btn.closest('.list-group-item');
+    const prev = item.previousElementSibling;
+    if (prev) prev.before(item);
+  }
+  function moveDown(btn) {
+    const item = btn.closest('.list-group-item');
+    const next = item.nextElementSibling;
+    if (next) next.after(item);
+  }
+
+  // Antes de submeter, monta JSON com estrutura:
+  // { dia_inicial, dia_final, itens: [ { prato_id, dia_semana, posicao, prato_do_dia: bool }, ... ] }
+  document.getElementById('cardapioForm').addEventListener('submit', function(e) {
+    // bootstrap validation
+    if (!this.checkValidity()) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.classList.add('was-validated');
+      return;
+    }
+
+    const data = {
+      dia_inicial: $('#dia_inicio').value,
+      dia_final: $('#dia_final').value,
+      itens: []
+    };
+
+    const dias = ['segunda','terça','quarta','quinta','sexta'];
+    dias.forEach(dia => {
+      const lista = document.getElementById('lista-' + dia);
+      if (!lista) return;
+      Array.from(lista.children).forEach((li, idx) => {
+        if (li.classList.contains('placeholder-empty')) return;
+        const pratoId = li.dataset.pratoId;
+        const radioItem = li.querySelector('.prato-do-dia-radio-item');
+        const pratoDoDia = radioItem && radioItem.checked;
+        data.itens.push({
+          prato_id: Number(pratoId),
+          dia_semana: dia,
+          posicao: idx,
+          prato_do_dia: pratoDoDia
+        });
+      });
+    });
+
+    // se não houver itens, cancela
+    if (data.itens.length === 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      alert('Adicione pelo menos um prato ao cardápio.');
+      return;
+    }
+
+    // garante apenas um prato_do_dia marcado
+    const marcados = data.itens.filter(i => i.prato_do_dia);
+    if (marcados.length > 1) {
+      e.preventDefault();
+      e.stopPropagation();
+      alert('Marque apenas um prato como "Prato do Dia".');
+      return;
+    }
+
+    // coloca JSON no campo oculto para o servidor processar
+    document.getElementById('cardapio_json').value = JSON.stringify(data);
+    // formulário será enviado normalmente
+  });
+
+  // Habilita/Desabilita as radios globais conforme itens adicionados
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('prato-do-dia-radio-item')) {
+      // ao marcar um radio de item, desmarca todos os outros de item (garantia visual)
+      if (e.target.checked) {
+        $$('.prato-do-dia-radio-item').forEach(r => { if (r !== e.target) r.checked = false; });
+      }
+    }
+  });
+
+  // Inicialização: pode popular selects dinamicamente se necessário
+</script>
+</body>
+</html>

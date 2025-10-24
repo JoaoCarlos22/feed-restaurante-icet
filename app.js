@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const homeRoutes = require('./routes/homeRoutes');
+const cardapioRoutes = require('./routes/cardapioRoutes');
 require('dotenv').config();
 
 const PORT = process.env.PORT;
@@ -18,6 +19,7 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(express.static('public'));
 app.use('/', homeRoutes);
+app.use('/cardapio', cardapioRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
