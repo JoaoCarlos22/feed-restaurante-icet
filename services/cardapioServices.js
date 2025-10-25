@@ -220,3 +220,30 @@ exports.comentarPrato = async (req, res) => {
         });
     }
 }
+
+exports.getCurtidasData = async (req, res) => {
+    try {
+        // Retorna os pratos mais curtidos do cardápio mais recente (top 10)
+        const [rows] = await pool.query(
+            `SELECT p.id, p.nome, p.curtidas
+             FROM cardapio_prato cp
+             JOIN prato p ON cp.prato_id = p.id
+             WHERE cp.cardapio_id = (SELECT id FROM cardapio ORDER BY dia_inicial DESC LIMIT 1)
+             GROUP BY p.id
+             ORDER BY p.curtidas DESC
+             LIMIT 10`
+        );
+
+        // formata para o front-end: [{ nome, curtidas }, ...]
+        const data = rows.map(r => ({ id: r.id, nome: r.nome, curtidas: r.curtidas || 0 }));
+        res.json({ data });
+    } catch (error) {
+        console.error('Erro ao obter dados de curtidas:', error);
+        res.status(500).render('paginaErro', {
+            title: 'Erro Interno do Servidor',
+            message: 'Ocorreu um erro ao obter os dados de curtidas. Tente novamente mais tarde.',
+            erro: error,
+            status: 500
+        });
+    }
+}
