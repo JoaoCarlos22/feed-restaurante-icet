@@ -72,6 +72,14 @@ exports.getHome = async (req, res) => {
                 });
             }
         }
+        if (req.session.mensagem) {
+            const mensagem = req.session.mensagem;
+            req.session.mensagem = null;
+            return res.render('home', {
+                pratos: pratos,
+                mensagem: mensagem
+            });
+        }
 
         res.render('home', {
             pratos: pratos
