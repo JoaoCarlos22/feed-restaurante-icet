@@ -3,7 +3,7 @@ const pool = require('../db/connection');
 exports.telaCadPrato = async (req, res) => {
     try {
         // coleta todos os pratos do banco de dados
-        const [pratos] = await pool.query('SELECT id, nome, descricao FROM prato ORDER BY nome');
+        const [pratos] = await pool.query('SELECT * FROM prato ORDER BY nome');
 
         // verifica se há mensagem na sessão para exibir na view
         if (req.session.mensagem) {
