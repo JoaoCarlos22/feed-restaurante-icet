@@ -1,0 +1,85 @@
+.prato-do-dia {
+  border: 2px solid #ffc107;
+  box-shadow: 0 0 10px rgba(255,193,7,0.2);
+}
+.imagem-prato {
+  height: 140px;
+  object-fit: cover;
+}
+.curtir-btn.active {
+  color: #ffffff;
+  font-weight: 600;
+}
+.comentarios {
+  max-height: 160px;
+  overflow-y: auto;
+}
+.carousel-day-indicator { cursor: pointer; }
+.day-title { font-weight: 600; text-transform: capitalize; }
+.card-prato { min-height: 260px; }
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-image: none !important;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 44px;
+  height: 44px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  opacity: 1;
+  border: none;
+}
+
+.carousel-control-prev { left: 5px; }
+.carousel-control-next { right: 5px; }
+
+.carousel-control-prev .bi,
+.carousel-control-next .bi {
+  color: #fff;
+  font-size: 1.25rem;
+  pointer-events: none;
+}
+
+.carousel-control-prev:focus,
+.carousel-control-next:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.25);
+  outline: none;
+}
+
+.carousel-day-indicator.active {
+  background-color: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
+}
+
+.carousel-inner {
+  padding-left: 64px;
+  padding-right: 64px;
+}
+
+.carousel-header {
+  padding-left: 64px;
+  padding-right: 64px;
+}
+
+@media (max-width: 767.98px) {
+  .carousel-inner,
+  .carousel-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next {
+    display: none;
+  }
+}
