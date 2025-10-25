@@ -272,7 +272,7 @@
         const texto = input.value.trim();
         if (!texto) return;
         try {
-          const res = await fetch(`/pratos/${id}/comentar`, {
+          const res = await fetch(`/cardapio/pratos/${id}/comentar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ texto })

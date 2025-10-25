@@ -136,7 +136,10 @@ exports.cadCardapio = async (req, res) => {
 exports.curtirPrato = async (req, res) => {
     try {
         const pratoId = req.params.id;
-        if (!pratoId) return res.status(400).json({ error: 'ID do prato não fornecido.' });
+        if (!pratoId) {
+            req.session.mensagem = 'ID do prato não fornecido.';
+            return res.redirect('/');
+        }
 
         // identifica usuário autenticado (compatível com session.userId ou session.usuarioId)
         const usuarioId = req.session.usuario.id;
@@ -172,6 +175,46 @@ exports.curtirPrato = async (req, res) => {
         return res.status(500).render('paginaErro', {
             title: 'Erro Interno do Servidor',
             message: 'Ocorreu um erro ao curtir o prato. Tente novamente mais tarde.',
+            erro: error,
+            status: 500
+        });
+    }
+}
+
+exports.comentarPrato = async (req, res) => {
+    try {
+        const pratoId = req.params.id;
+        const { texto } = req.body;
+
+        // Verifica se o ID do prato foi fornecido
+        if (!pratoId) {
+            req.session.mensagem = 'ID do prato não fornecido.';
+            return res.redirect('/');
+        }
+
+        // Verifica se o texto do comentário foi fornecido
+        if (!texto || texto.trim() === '') {
+            req.session.mensagem = 'O texto do comentário não pode ser vazio.';
+            return res.redirect('/');
+        }
+
+        // Realiza o comentário do prato
+        await pool.query('INSERT INTO comentario (prato_id, usuario_id, texto) VALUES (?, ?, ?)', [pratoId, req.session.usuario.id, texto.trim()]);
+
+        const comentario = {
+            autor: req.session.usuario.nome,
+            texto: texto.trim()
+        };
+
+        return res.json({
+            comentario,
+            message: 'Comentário adicionado com sucesso.'
+        });
+    } catch (error) {
+        console.error('Erro ao comentar prato:', error);
+        return res.status(500).render('paginaErro', {
+            title: 'Erro Interno do Servidor',
+            message: 'Ocorreu um erro ao adicionar o comentário. Tente novamente mais tarde.',
             erro: error,
             status: 500
         });
