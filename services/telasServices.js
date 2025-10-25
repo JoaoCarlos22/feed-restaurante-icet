@@ -51,6 +51,28 @@ exports.getHome = async (req, res) => {
         // marca como 'prato do dia' quando o campo prato_dia for true
         const [pratos] = await pool.query('SELECT p.*, cp.dia_semana, cp.posicao FROM cardapio_prato cp JOIN prato p ON cp.prato_id = p.id WHERE cp.cardapio_id = (SELECT id FROM cardapio ORDER BY dia_inicial DESC LIMIT 1) ORDER BY FIELD(cp.dia_semana, "segunda", "terça", "quarta", "quinta", "sexta"), cp.posicao');
 
+        // busca comentários para os pratos retornados e anexa em prato.comentarios
+        if (pratos && pratos.length) {
+            const ids = [...new Set(pratos.map(p => p.id))]; // ids únicos
+            if (ids.length) {
+                const placeholders = ids; // mysql2 aceita array para IN (?)
+                const [comentariosRows] = await pool.query(
+                    'SELECT c.prato_id, u.nome AS autor, c.texto FROM comentario c JOIN usuario u ON c.usuario_id = u.id WHERE c.prato_id IN (?) ORDER BY c.id DESC',
+                    [placeholders]
+                );
+
+                const comentariosMap = {};
+                comentariosRows.forEach(r => {
+                    if (!comentariosMap[r.prato_id]) comentariosMap[r.prato_id] = [];
+                    comentariosMap[r.prato_id].push({ autor: r.autor, texto: r.texto });
+                });
+
+                pratos.forEach(p => {
+                    p.comentarios = comentariosMap[p.id] || [];
+                });
+            }
+        }
+
         res.render('home', {
             pratos: pratos
         });
