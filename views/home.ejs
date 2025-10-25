@@ -51,8 +51,8 @@
       border: none;
     }
 
-    .carousel-control-prev { left: 10px; }
-    .carousel-control-next { right: 10px; }
+    .carousel-control-prev { left: 5px; }
+    .carousel-control-next { right: 5px; }
 
     .carousel-control-prev .bi,
     .carousel-control-next .bi {
@@ -72,6 +72,31 @@
       background-color: #0d6efd;
       color: #fff;
       border-color: #0d6efd;
+    }
+
+    /* espaço lateral dentro do carrossel para evitar sobreposição das setas */
+    .carousel-inner {
+      padding-left: 64px;
+      padding-right: 64px;
+    }
+
+    /* cabeçalho do carrossel alinhado ao conteúdo do carrossel */
+    .carousel-header {
+      padding-left: 64px;
+      padding-right: 64px;
+    }
+
+    @media (max-width: 767.98px) {
+      .carousel-inner,
+      .carousel-header {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      /* em telas muito pequenas, esconder setas para evitar sobreposição */
+      .carousel-control-prev,
+      .carousel-control-next {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -107,7 +132,7 @@
   <% } else { %>
 
   <div id="diasCarouselContainer" class="mb-4">
-    <div class="d-flex align-items-center mb-2">
+    <div class="d-flex align-items-center mb-2 carousel-header">
       <div class="me-auto day-title">Deslize por dia</div>
       <div class="small text-muted">Use os controles ou os indicadores abaixo</div>
     </div>
@@ -125,14 +150,15 @@
                   </div>
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-3 justify-content-center">
                   <% if (agrupados[dia].length === 0) { %>
                     <div class="col-12">
                       <div class="alert alert-light mb-0">Nenhum prato cadastrado para <strong class="text-capitalize"><%= dia %></strong>.</div>
                     </div>
                   <% } else { %>
                     <% agrupados[dia].forEach(function(prato) { %>
-                      <div class="col-12 col-md-6 col-lg-4">
+                      <!-- centraliza e permite até 3 cards por linha: col-12 (xs), col-sm-6 (>=576px), col-md-4 (>=768px) -->
+                      <div class="col-12 col-sm-6 col-md-4">
                         <div class="card h-100 card-prato <%= prato.prato_dia ? 'prato-do-dia' : '' %>">
                           <img src="/images/<%= prato.imagem || 'placeholder.png' %>" class="card-img-top imagem-prato" alt="<%= prato.nome %>">
                           <div class="card-body d-flex flex-column">
