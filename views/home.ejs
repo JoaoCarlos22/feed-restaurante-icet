@@ -16,7 +16,7 @@
       object-fit: cover;
     }
     .curtir-btn.active {
-      color: #0d6efd;
+      color: #ffffff;
       font-weight: 600;
     }
     .comentarios {
@@ -247,8 +247,10 @@
       btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
         try {
-          const res = await fetch(`/pratos/${id}/curtir`, { method: 'POST' });
+          // envia requisição para curtir
+          const res = await fetch(`/cardapio/pratos/${id}/curtir`, { method: 'POST' });
           if (res.ok) {
+            // atualiza contador e estado do botão
             const json = await res.json();
             const contador = btn.querySelector('.contador-curtidas');
             if (json.curtidas !== undefined) contador.textContent = json.curtidas;

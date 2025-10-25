@@ -133,3 +133,47 @@ exports.cadCardapio = async (req, res) => {
     }
 }
 
+exports.curtirPrato = async (req, res) => {
+    try {
+        const pratoId = req.params.id;
+        if (!pratoId) return res.status(400).json({ error: 'ID do prato não fornecido.' });
+
+        // identifica usuário autenticado (compatível com session.userId ou session.usuarioId)
+        const usuarioId = req.session.usuario.id;
+        if (!usuarioId) {
+            req.session.mensagem = 'Por favor, faça login para curtir o prato.';
+            return res.redirect('/login');
+        }
+
+        // tenta inserir; se já existir (unique key), afectRows será 0
+        const [insertResult] = await pool.query('INSERT IGNORE INTO curtida (prato_id, usuario_id) VALUES (?, ?)', [pratoId, usuarioId]);
+
+        let liked = false;
+        if (insertResult.affectedRows && insertResult.affectedRows > 0) {
+            // nova curtida inserida -> incrementa contador em prato
+            await pool.query('UPDATE prato SET curtidas = IFNULL(curtidas,0) + 1 WHERE id = ?', [pratoId]);
+            liked = true;
+        }
+
+        // busca o total atual de curtidas
+        const [rows] = await pool.query('SELECT curtidas FROM prato WHERE id = ?', [pratoId]);
+        const curtidas = rows && rows[0] ? rows[0].curtidas || 0 : 0;
+
+        return res.json({ 
+            curtidas,
+            liked,
+            message: liked ? 'Curtida registrada.' : 'Você já curtiu este prato.' 
+        });
+    } catch (error) {
+        if (connection) {
+            try { await connection.rollback(); connection.release(); } catch (e) { }
+        }
+        console.error('Erro ao curtir prato:', error);
+        return res.status(500).render('paginaErro', {
+            title: 'Erro Interno do Servidor',
+            message: 'Ocorreu um erro ao curtir o prato. Tente novamente mais tarde.',
+            erro: error,
+            status: 500
+        });
+    }
+}
