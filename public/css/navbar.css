@@ -1,0 +1,62 @@
+:root {
+  --nav-dark-1: #0b6b28; /* verde principal */
+  --nav-dark-2: #07531f; /* sombra */
+  --nav-contrast: #ffffff;
+  --nav-muted: rgba(255,255,255,0.85);
+  --nav-border: rgba(255,255,255,0.12);
+}
+
+.app-navbar {
+  background: linear-gradient(180deg, var(--nav-dark-1), var(--nav-dark-2));
+  color: var(--nav-contrast);
+  box-shadow: 0 2px 6px rgba(3,41,16,0.12);
+}
+
+/* marca e links */
+.app-navbar .navbar-brand {
+  color: var(--nav-contrast);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.app-navbar .navbar-nav .nav-link,
+.app-navbar .d-flex .btn {
+  color: var(--nav-muted);
+}
+
+/* botões no cabeçalho */
+.app-navbar .btn-outline-secondary {
+  color: var(--nav-contrast);
+  border-color: var(--nav-border);
+}
+.app-navbar .btn-outline-secondary:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.app-navbar .btn-outline-primary {
+  color: var(--nav-dark-1);
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
+.app-navbar .btn-outline-danger {
+  color: var(--nav-contrast);
+  border-color: var(--nav-border);
+}
+
+/* toggler (mobile) */
+.app-navbar .navbar-toggler {
+  border-color: var(--nav-border);
+}
+.app-navbar .navbar-toggler-icon {
+  filter: invert(1) brightness(1.2);
+}
+
+/* garantir contraste dos textos dentro do collapse */
+.app-navbar .navbar-collapse,
+.app-navbar .navbar-collapse .nav-link {
+  color: var(--nav-contrast);
+}
+
+/* utilitários */
+.app-navbar a { text-decoration: none; }
