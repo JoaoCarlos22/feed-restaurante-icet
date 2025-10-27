@@ -4,6 +4,12 @@
   --nav-contrast: #ffffff;
   --nav-muted: rgba(255,255,255,0.85);
   --nav-border: rgba(255,255,255,0.12);
+
+  /* footer-specific shades (usar tons próximos ao header) */
+  --footer-bg-1: var(--nav-dark-2);
+  --footer-bg-2: #063e18;
+  --footer-muted: rgba(255,255,255,0.9);
+  --footer-muted-soft: rgba(255,255,255,0.7);
 }
 
 .app-navbar {
@@ -60,3 +66,34 @@
 
 /* utilitários */
 .app-navbar a { text-decoration: none; }
+
+/* ---------- Footer (padronizado com navbar) ---------- */
+.app-footer {
+  background: linear-gradient(180deg, var(--footer-bg-1), var(--footer-bg-2));
+  color: var(--nav-contrast);
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.app-footer a {
+  color: var(--footer-muted);
+}
+.app-footer a:hover {
+  color: var(--nav-contrast);
+  text-decoration: none;
+}
+.app-footer .small,
+.app-footer .text-muted {
+  color: var(--footer-muted-soft) !important;
+}
+.app-footer h6 {
+  color: var(--nav-contrast);
+  font-weight: 600;
+}
+.app-footer .list-unstyled li + li {
+  margin-top: .35rem;
+}
+
+/* responsividade e espaçamentos */
+.app-footer .container { max-width: 1140px; }
+@media (max-width: 575.98px) {
+  .app-footer .text-md-end { text-align: left !important; margin-top: .5rem; }
+}
