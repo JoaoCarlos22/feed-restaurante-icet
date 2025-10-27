@@ -81,28 +81,53 @@ async function loadCurtidas() {
       canvas.__chartInstance = null;
     }
 
+    // cores: destaque para o primeiro (mais curtido)
+    const baseBg = 'rgba(13,110,253,0.85)';        // azul
+    const baseBorder = 'rgba(13,110,253,1)';
+    const topBg = 'rgba(255,193,7,0.95)';          // amarelo destaque
+    const topBorder = 'rgba(255,193,7,1)';
+
+    const backgroundColor = values.map((v, i) => i === 0 ? topBg : baseBg);
+    const borderColor = values.map((v, i) => i === 0 ? topBorder : baseBorder);
+
     canvas.__chartInstance = new Chart(ctx, {
-      type: 'bar',
+      type: 'bar', // barras verticais
       data: {
         labels,
         datasets: [{
           label: 'Curtidas',
           data: values,
-          backgroundColor: 'rgba(13,110,253,0.8)',
-          borderColor: 'rgba(13,110,253,1)',
-          borderWidth: 1
+          backgroundColor,
+          borderColor,
+          borderWidth: 1,
+          borderRadius: 8,
+          maxBarThickness: 64
         }]
       },
       options: {
-        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
+        animation: { duration: 600 },
         scales: {
-          x: { beginAtZero: true, ticks: { precision:0 } }
+          x: {
+            ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0 }
+          }
         },
         plugins: {
           legend: { display: false },
-          tooltip: { mode: 'nearest' }
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const v = context.parsed.y ?? context.parsed;
+                return 'Curtidas: ' + (v || 0);
+              }
+            }
+          }
         }
       }
     });

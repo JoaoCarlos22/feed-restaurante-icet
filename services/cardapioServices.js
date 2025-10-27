@@ -248,7 +248,7 @@ exports.getCurtidasData = async (req, res) => {
              WHERE cp.cardapio_id = (SELECT id FROM cardapio ORDER BY dia_inicial DESC LIMIT 1)
              GROUP BY p.id
              ORDER BY p.curtidas DESC
-             LIMIT 10`
+             LIMIT 6`
         );
 
         // formata para o front-end: [{ nome, curtidas }, ...]
