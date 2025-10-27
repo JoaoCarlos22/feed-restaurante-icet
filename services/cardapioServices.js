@@ -89,9 +89,20 @@ exports.cadCardapio = async (req, res) => {
             return res.redirect('/cardapio/cadastrar');
         }
 
-        const marcados = itens.filter(i => i.prato_do_dia);
-        if (marcados.length > 1) {
-            req.session.mensagem = 'Apenas um prato pode ser marcado como Prato do Dia.';
+        // Validação: permitir 0 ou 1 "prato do dia" por cada dia da semana
+        const diasList = ['segunda','terça','quarta','quinta','sexta'];
+        const diasComErro = [];
+
+        diasList.forEach(dia => {
+            const marcadosNoDia = itens.filter(i => {
+                const diaSem = (i.dia_semana || '').toString().toLowerCase().replace('ç', 'c').trim();
+                return diaSem === dia && !!i.prato_do_dia;
+            });
+            if (marcadosNoDia.length > 1) diasComErro.push(dia);
+        });
+
+        if (diasComErro.length) {
+            req.session.mensagem = 'Marque no máximo 1 prato do dia por dia. Verifique: ' + diasComErro.join(', ');
             return res.redirect('/cardapio/cadastrar');
         }
 
@@ -102,7 +113,7 @@ exports.cadCardapio = async (req, res) => {
         // prepara inserts para cardapio_prato
         const values = itens.map(it => {
             // normaliza dia 'terça' -> 'terca' para casar com enum do schema, se necessário
-            const diaSem = (it.dia_semana || '').replace('ç', 'c');
+            const diaSem = (it.dia_semana || '').toString().replace('ç', 'c');
             return [cardapioId, it.prato_id, diaSem, it.posicao || 0];
         });
 
@@ -110,15 +121,21 @@ exports.cadCardapio = async (req, res) => {
             await pool.query('INSERT INTO cardapio_prato (cardapio_id, prato_id, dia_semana, posicao) VALUES ?', [values]);
         }
 
-        // atualiza flag prato_dia na tabela prato (opcional, conforme regra do projeto)
-        if (marcados.length === 1) {
-            const pratoDoDiaId = marcados[0].prato_id;
+        // atualiza flag prato_dia na tabela prato:
+        // agora permitimos até 1 prato do dia por cada dia da semana -> marcados pode conter múltiplos (um por dia)
+        const marcados = itens.filter(i => !!i.prato_do_dia);
+        if (marcados.length > 0) {
+            // reseta todas flags
             await pool.query('UPDATE prato SET prato_dia = 0');
-            await pool.query('UPDATE prato SET prato_dia = 1 WHERE id = ?', [pratoDoDiaId]);
+            // coleta ids únicos marcados e marca-os
+            const idsUnicos = Array.from(new Set(marcados.map(m => Number(m.prato_id)).filter(Boolean)));
+            if (idsUnicos.length) {
+                await pool.query('UPDATE prato SET prato_dia = 1 WHERE id IN (?)', [idsUnicos]);
+            }
+        } else {
+            // se nenhum marcado, garante que não há flags ativas
+            await pool.query('UPDATE prato SET prato_dia = 0');
         }
-
-        /* await connection.commit();
-        connection.release(); */
 
         req.session.mensagem = 'Cardápio cadastrado com sucesso.';
         res.redirect('/');
